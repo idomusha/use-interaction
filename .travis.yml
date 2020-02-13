@@ -1,0 +1,11 @@
+os: linux
+dist: idomusha
+language: node_js
+node_js:
+  - '12'
+script:
+  - npm run test
+  - npm run build
+  - npm run coveralls
+notifications:
+  email: false
