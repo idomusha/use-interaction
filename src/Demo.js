@@ -40,21 +40,27 @@ const Demo = () => {
           <strong>
             <code className="variable">history</code>
           </strong>{' '}
-          keeps a record of all user interaction types: that way a user that
-          interacts both with mouse and touch can easily be detected.
+          keeps a record of all user interaction types:{' '}
+          <i>
+            that way a user that interacts both with mouse and touch can easily
+            be detected.
+          </i>
           <br /> <br />
           <strong>
             <code className="variable">canHover</code>
           </strong>{' '}
-          is a shorcut for any type of interaction except mouse: allows to
-          display hidden information to the user in this case.
+          is a shorcut for any type of interaction except mouse:{' '}
+          <i>allows to display hidden information to the user in this case.</i>
           <br />
           <br />
           <strong>
             <code className="variable">accuracy</code>
           </strong>{' '}
-          is the size of contact geometry of the pointer: the higher the number,
-          the bigger the button size should be defined.
+          is the max size collected of contact geometry of the pointer (by
+          interaction type):{' '}
+          <i>
+            the higher the number, the bigger the button size should be defined.
+          </i>
         </p>
 
         <section id="image">

@@ -3,7 +3,6 @@ import { renderHook, cleanup, act } from '@testing-library/react-hooks'
 import { fireEvent, createEvent, render, wait } from '@testing-library/react'
 
 import useInteraction from './useInteraction'
-import Demo from './Demo'
 
 afterEach(cleanup)
 
@@ -64,17 +63,39 @@ test('should set interaction type of the user to keyboard', () => {
   unmount()
 })
 
-test('should not set interaction type of the user to keyboard', () => {
+test('should not set interaction type of the user to keyboard when user is typing in form elements', () => {
   const { result } = renderHook(() => useInteraction())
-  const { getByTestId } = render(<input type="text" data-testid="test-input" />)
+  const { getByTestId } = render(
+    <>
+      <input type="text" data-testid="test-input" />
+      <select data-testid="test-select">
+        <option value=""></option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+      </select>
+      <textarea data-testid="test-textarea" />
+    </>
+  )
 
   act(() => {
     fireEvent.mouseMove(document.body, {})
     fireEvent.keyDown(getByTestId('test-input'), {
+      key: 'Enter',
+      code: 'Enter',
+      keyCode: 13,
+      which: 13,
+    })
+    fireEvent.keyDown(getByTestId('test-select'), {
       key: ' ',
       code: 'Space',
       keyCode: 32,
       which: 32,
+    })
+    fireEvent.keyDown(getByTestId('test-textarea'), {
+      key: 'ArrowLeft',
+      code: 'ArrowLeft',
+      keyCode: 37,
+      which: 37,
     })
   })
 
@@ -93,6 +114,30 @@ test('should set interaction type of the user to touch and then to mouse', () =>
   wait(() => {
     expect(result.current[0]).toBe('mouse')
     expect(result.current[1]).toMatchObject(['touch', 'mouse'])
+    expect(result.current[2]).toBeTruthy()
+  })
+})
+
+test('should set interaction type of the user to keyboard and then to mouse', () => {
+  const { result } = renderHook(() => useInteraction())
+  const { getByTestId } = render(<input type="text" data-testid="test-input" />)
+
+  act(() => {
+    fireEvent.keyDown(getByTestId('test-input'), {
+      key: 'Tab',
+      code: 'Tab',
+      keyCode: 9,
+      which: 9,
+    })
+  })
+
+  act(() => {
+    fireEvent.wheel(document.body, {})
+  })
+
+  wait(() => {
+    expect(result.current[0]).toBe('mouse')
+    expect(result.current[1]).toMatchObject(['keyboard', 'mouse'])
     expect(result.current[2]).toBeTruthy()
   })
 })

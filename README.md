@@ -1,7 +1,7 @@
 # React hook for following user interaction type
 
-[![Build Status](https://travis-ci.org/idomusha/use-interaction.svg?branch=master)](https://travis-ci.org/idomusha/use-interaction)
-[![npm version](https://badge.fury.io/js/use-interaction.svg)](https://badge.fury.io/js/use-interaction)
+[![Build Status](https://travis-ci.org/idomusha/use-interaction.svg?branch=master&service=github)](https://travis-ci.org/idomusha/use-interaction)
+[![npm version](https://badge.fury.io/js/use-interaction.svg?service=github)](https://badge.fury.io/js/use-interaction)
 [![Coverage Status](https://coveralls.io/repos/github/idomusha/use-interaction/badge.svg?branch=master&service=github)](https://coveralls.io/github/idomusha/use-interaction?branch=master)
 
 React hook `useInteraction()` allows to get the user interaction type: `touch`, `mouse` or `keyboard`.
@@ -90,4 +90,4 @@ export const Demo = () => {
 | 1st element (interaction) |     `string`     | interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `touch`) |    `null`     |
 | 2nd element (history)     | `Array.<string>` | all interaction types used from the load (i.e. `['touch', 'mouse']`}        |     `[]`      |
 | 3rd element (canHover)    |    `boolean`     | if the user can hover (i.e. `true`)                                         |    `false`    |
-| 4th element (accuracy)    |     `number`     | pointer size in pixels (i.e. `23`)                                          |    `null`     |
+| 4th element (accuracy)    |     `number`     | max pointer size in pixels by interaction type (i.e. `23`)                  |    `null`     |

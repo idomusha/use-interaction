@@ -19,7 +19,7 @@ const useInteraction = ({ initialHover = false } = {}) => {
   const [firedEvent, setFiredEvent] = useState({
     touchStart: null,
     mouseMove: null,
-    mouseOver: null,
+    wheel: null,
     keyDown: null,
   })
   const [history, setHistory] = useGlobal('history')
@@ -54,47 +54,51 @@ const useInteraction = ({ initialHover = false } = {}) => {
     setCanHover(false)
   }, [history, setHistory])
 
-  const handleInteractionMouse = useCallback(() => {
-    // prevent false positive on mousemove with touch devices
-    if (!firedEvent.touchStart) {
-      setFiredEvent(current => ({
-        ...current,
-        mouseMove: true,
-      }))
-    }
-
-    // prevent false positive on mousemove when navigate with keyboard
-    if (firedEvent.keyDown) {
-      setFiredEvent(current => ({
-        ...current,
-        mouseMove: false,
-      }))
-    }
-
-    setFiredEvent(current => ({
-      ...current,
+  const handleInteractionMouse = useCallback(
+    event => {
       // prevent false positive on mousemove with touch devices
-      touchStart: false,
-      // prevent false positive on mousemove when navigate with keyboard
-      keyDown: false,
-    }))
+      if (!firedEvent.touchStart) {
+        setFiredEvent(current => ({
+          ...current,
+          ...(event.type === 'mousemove' && { mouseMove: true }),
+          ...(event.type === 'wheel' && { wheel: true }),
+        }))
+      }
 
-    if (
-      firedEvent.mouseMove === null ||
-      firedEvent.mouseMove === true ||
-      firedEvent.touchStart === false
-    ) {
-      setHistory([...new Set([...history, 'mouse'])])
-      setInteraction('mouse')
-      setCanHover(true)
-    }
-  }, [
-    firedEvent.touchStart,
-    firedEvent.keyDown,
-    firedEvent.mouseMove,
-    setHistory,
-    history,
-  ])
+      // prevent false positive on mousemove when navigate with keyboard
+      if (firedEvent.keyDown) {
+        setFiredEvent(current => ({
+          ...current,
+          mouseMove: false,
+        }))
+      }
+
+      setFiredEvent(current => ({
+        ...current,
+        // prevent false positive on mousemove with touch devices
+        touchStart: false,
+        // prevent false positive on mousemove when navigate with keyboard
+        keyDown: false,
+      }))
+
+      if (
+        firedEvent.mouseMove === null ||
+        firedEvent.mouseMove === true ||
+        firedEvent.touchStart === false
+      ) {
+        setHistory([...new Set([...history, 'mouse'])])
+        setInteraction('mouse')
+        setCanHover(true)
+      }
+    },
+    [
+      firedEvent.touchStart,
+      firedEvent.keyDown,
+      firedEvent.mouseMove,
+      setHistory,
+      history,
+    ]
+  )
 
   const handleInteractionKeyboard = useCallback(
     event => {
@@ -112,11 +116,12 @@ const useInteraction = ({ initialHover = false } = {}) => {
           return
         }
 
-        // this pressed key causes an event mousemove
+        // some pressed keys causes an event mousemove
         setFiredEvent(current => ({
           ...current,
           keyDown: true,
           mouseMove: false,
+          wheel: false,
         }))
 
         if (interaction === 'keyboard') return
@@ -142,28 +147,30 @@ const useInteraction = ({ initialHover = false } = {}) => {
 
   useEffect(() => {
     window.addEventListener('touchstart', handleInteractionTouch, false)
-    !firedEvent.mouseMove
-      ? window.addEventListener('mousemove', handleInteractionMouse, false)
-      : window.removeEventListener('mousemove', handleInteractionMouse, false)
+    if (firedEvent.mouseMove || firedEvent.wheel) {
+      window.removeEventListener('mousemove', handleInteractionMouse, false)
+      window.removeEventListener('wheel', handleInteractionMouse, false)
+    } else {
+      window.addEventListener('mousemove', handleInteractionMouse, false)
+      window.addEventListener('wheel', handleInteractionMouse, false)
+    }
     window.addEventListener('keydown', handleInteractionKeyboard, false)
     window.addEventListener('pointerdown', handleInteractionPointer, false)
 
     return () => {
       window.removeEventListener('touchstart', handleInteractionTouch, false)
       window.removeEventListener('mousemove', handleInteractionMouse, false)
+      window.removeEventListener('wheel', handleInteractionMouse, false)
       window.removeEventListener('keydown', handleInteractionKeyboard, false)
       window.removeEventListener('pointerdown', handleInteractionPointer, false)
     }
   }, [
     firedEvent.mouseMove,
-    firedEvent.touchStart,
-    handleInteractionKeyboard,
-    handleInteractionMouse,
-    handleInteractionPointer,
+    firedEvent.wheel,
     handleInteractionTouch,
-    inputs,
-    keys,
-    interaction,
+    handleInteractionMouse,
+    handleInteractionKeyboard,
+    handleInteractionPointer,
   ])
 
   return [interaction, history, canHover, accuracy]
