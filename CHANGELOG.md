@@ -9,6 +9,12 @@
 ### Removed
  -->
 
+## [1.2.1] - 2020-02-16
+
+### Added
+
+- Peer dependencies
+
 ## [1.2.0] - 2020-02-16
 
 ### Added

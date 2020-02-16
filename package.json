@@ -1,6 +1,6 @@
 {
   "name": "use-interaction",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": false,
   "description": "React hook for getting and following user interaction type",
   "keywords": [
@@ -75,7 +75,10 @@
     "styled-components": "^5.0.1"
   },
   "peerDependencies": {
-    "react": "^16.12.0"
+    "lodash": "^4.17.15",
+    "prop-types": "^15.7.2",
+    "react": "^16.12.0",
+    "reactn": "^2.2.5"
   },
   "eslintConfig": {
     "extends": "react-app"
