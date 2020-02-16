@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/idomusha/use-interaction.svg?branch=master)](https://travis-ci.org/idomusha/use-interaction)
 [![npm version](https://badge.fury.io/js/use-interaction.svg)](https://badge.fury.io/js/use-interaction)
-[![Coverage Status](https://coveralls.io/repos/github/idomusha/use-interaction/badge.svg?branch=master)](https://coveralls.io/github/idomusha/use-interaction?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/idomusha/use-interaction/badge.svg?branch=master&service=github)](https://coveralls.io/github/idomusha/use-interaction?branch=master)
 
 React hook `useInteraction()` allows to get the user interaction type: `touch`, `mouse` or `keyboard`.
 
@@ -68,7 +68,9 @@ export const Demo = () => {
 
 `object`
 
-- **initialHover**: `boolean` - to not wait at first an action from the user, **canHover** can be defined via this parameter to be effective as soon as the page is loaded (i.e. `true`, default: `null`)
+| Property Name    |   Type    | Description                                                                                                                                               | Default Value |
+| :--------------- | :-------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------: |
+| **initialHover** | `boolean` | to not wait an action on the part of the user, **canHover** can be defined via this parameter to be effective as soon as the page is loaded (i.e. `true`) |    `false`    |
 
 <code>
   const [interaction, history, canHover, accuracy] = useInteraction({initialHover: true})
@@ -83,9 +85,9 @@ export const Demo = () => {
 - **canHover**: `boolean` - if the user can hover (i.e. `true`, default: `null`)
 - **accuracy**: `number` - pointer size in pixels (i.e. `23`, default: `null`), -->
 
-| Returned Array | Assigned Name |       Type       | Description                                                                 | Default Value |
-| :------------- | :-----------: | :--------------: | :-------------------------------------------------------------------------- | :-----------: |
-| 1st element    |  interaction  |     `string`     | interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `touch`) |    `null`     |
-| 2nd element    |    history    | `Array.<string>` | all interaction types used from the load (i.e. `['touch', 'mouse']`}        |     `[]`      |
-| 3rd element    |   canHover    |    `boolean`     | if the user can hover (i.e. `true`)                                         |    `false`    |
-| 4th element    |   accuracy    |     `number`     | pointer size in pixels (i.e. `23`)                                          |    `null`     |
+| Returned Array            |       Type       | Description                                                                 | Default Value |
+| :------------------------ | :--------------: | :-------------------------------------------------------------------------- | :-----------: |
+| 1st element (interaction) |     `string`     | interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `touch`) |    `null`     |
+| 2nd element (history)     | `Array.<string>` | all interaction types used from the load (i.e. `['touch', 'mouse']`}        |     `[]`      |
+| 3rd element (canHover)    |    `boolean`     | if the user can hover (i.e. `true`)                                         |    `false`    |
+| 4th element (accuracy)    |     `number`     | pointer size in pixels (i.e. `23`)                                          |    `null`     |

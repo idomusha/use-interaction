@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { round } from 'lodash'
+import { setGlobal, useGlobal } from 'reactn'
 
-let history = []
+setGlobal({
+  history: [],
+  prevInteraction: null,
+  accuracy: null,
+})
 
 const getKey = event => (event.keyCode ? event.keyCode : event.which)
 
@@ -11,13 +16,15 @@ const getTarget = event => event.target || event.srcElement
 const useInteraction = ({ initialHover = false } = {}) => {
   const [interaction, setInteraction] = useState(null)
   const [canHover, setCanHover] = useState(initialHover)
-  const [accuracy, setAccuracy] = useState(null)
   const [firedEvent, setFiredEvent] = useState({
     touchStart: null,
     mouseMove: null,
     mouseOver: null,
     keyDown: null,
   })
+  const [history, setHistory] = useGlobal('history')
+  const [prevInteraction, setPrevInteraction] = useGlobal('prevInteraction')
+  const [accuracy, setAccuracy] = useGlobal('accuracy')
   const inputs = ['input', 'select', 'textarea']
   const keys = {
     9: 'tab',
@@ -42,10 +49,10 @@ const useInteraction = ({ initialHover = false } = {}) => {
       mouseMove: false,
     }))
 
-    history = [...new Set([...history, 'touch'])]
+    setHistory([...new Set([...history, 'touch'])])
     setInteraction('touch')
     setCanHover(false)
-  }, [setFiredEvent])
+  }, [history, setHistory])
 
   const handleInteractionMouse = useCallback(() => {
     // prevent false positive on mousemove with touch devices
@@ -77,11 +84,17 @@ const useInteraction = ({ initialHover = false } = {}) => {
       firedEvent.mouseMove === true ||
       firedEvent.touchStart === false
     ) {
-      history = [...new Set([...history, 'mouse'])]
+      setHistory([...new Set([...history, 'mouse'])])
       setInteraction('mouse')
       setCanHover(true)
     }
-  }, [firedEvent, setFiredEvent, setCanHover])
+  }, [
+    firedEvent.touchStart,
+    firedEvent.keyDown,
+    firedEvent.mouseMove,
+    setHistory,
+    history,
+  ])
 
   const handleInteractionKeyboard = useCallback(
     event => {
@@ -108,19 +121,23 @@ const useInteraction = ({ initialHover = false } = {}) => {
 
         if (interaction === 'keyboard') return
 
-        history = [...new Set([...history, 'keyboard'])]
+        setHistory([...new Set([...history, 'keyboard'])])
         setInteraction('keyboard')
         setCanHover(false)
       }
     },
-    [inputs, keys, interaction, setFiredEvent]
+    [keys, inputs, interaction, setHistory, history]
   )
 
   const handleInteractionPointer = useCallback(
     event => {
-      setAccuracy(round(event.height, 1))
+      const nextAccuracy = round(event.height, 1)
+      if (nextAccuracy > accuracy || prevInteraction !== event.pointerType) {
+        setAccuracy(nextAccuracy)
+      }
+      setPrevInteraction(event.pointerType)
     },
-    [setAccuracy]
+    [accuracy, prevInteraction, setAccuracy, setPrevInteraction]
   )
 
   useEffect(() => {

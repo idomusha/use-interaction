@@ -100,7 +100,9 @@ test('should set interaction type of the user to touch and then to mouse', () =>
 test('should set accuracy of the pointer', () => {
   const { result } = renderHook(() => useInteraction())
 
-  const pointerDown = createEvent.click(document.body, { height: 23.666666666 })
+  const pointerDown = createEvent.pointerDown(document.body, {
+    height: 23.666666666,
+  })
 
   act(() => {
     fireEvent(document.body, pointerDown)
