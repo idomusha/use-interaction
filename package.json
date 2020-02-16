@@ -23,10 +23,13 @@
   },
   "homepage": "https://idomusha.github.io/use-interaction/",
   "main": "src/useInteraction.js",
+  "files": [
+    "dist/*"
+  ],
   "license": "MIT",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && rollup -c -o dist/useInteraction.min.js",
     "test": "react-scripts test",
     "coveralls": "npm run test -- --coverage --watchAll=false --collectCoverageFrom=src/useInteraction.js && cat ./coverage/lcov.info | coveralls",
     "lint": "eslint src/**/*.js",
@@ -46,6 +49,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/react-hooks": "^3.2.1",
     "@testing-library/user-event": "^7.1.2",
+    "babel-preset-react": "^6.24.1",
     "coveralls": "^3.0.9",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.0.1",
@@ -65,6 +69,9 @@
     "react-dom": "^16.12.0",
     "react-scripts": "3.3.1",
     "react-test-renderer": "^16.12.0",
+    "reactn": "^2.2.5",
+    "rollup": "^1.31.1",
+    "rollup-plugin-terser": "^5.2.0",
     "styled-components": "^5.0.1"
   },
   "peerDependencies": {
