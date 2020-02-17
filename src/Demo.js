@@ -14,6 +14,11 @@ import useInteraction from './useInteraction'
 const Demo = () => {
   const [interaction, history, canHover, accuracy] = useInteraction()
 
+  const handleClick = event => {
+    event.preventDefault()
+    alert('clicked')
+  }
+
   return (
     <div
       className="Demo"
@@ -142,7 +147,7 @@ const Demo = () => {
               <option value="1">1</option>
             </select>
             <textarea />
-            <button>OKAY</button>
+            <button onClick={handleClick}>OKAY</button>
           </form>
           <h3>
             It can also help to provide to the user a visual indicator of the
