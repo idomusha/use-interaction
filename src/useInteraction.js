@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { round } from 'lodash'
-import { setGlobal, useGlobal } from 'reactn'
-
-setGlobal({
-  history: [],
-  prevInteraction: null,
-  accuracy: null,
-})
 
 const getKey = event => (event.keyCode ? event.keyCode : event.which)
 
@@ -22,9 +15,9 @@ const useInteraction = ({ initialHover = false } = {}) => {
     wheel: null,
     keyDown: null,
   })
-  const [history, setHistory] = useGlobal('history')
-  const [prevInteraction, setPrevInteraction] = useGlobal('prevInteraction')
-  const [accuracy, setAccuracy] = useGlobal('accuracy')
+  const [history, setHistory] = useState([])
+  const [prevInteraction, setPrevInteraction] = useState(null)
+  const [accuracy, setAccuracy] = useState(null)
   const inputs = ['input', 'select', 'textarea']
   const keys = {
     9: 'tab',
