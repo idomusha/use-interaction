@@ -1,33 +1,55 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   MouseOutlined,
   TouchAppOutlined,
   KeyboardOutlined,
   SwapHoriz,
 } from '@material-ui/icons'
+import { navigate } from '@reach/router'
 
 import logo from './logo.svg'
 import './Reset.scss'
 import './Demo.scss'
 import useInteraction from './useInteraction'
 
-const Demo = () => {
-  const [interaction, history, canHover, accuracy] = useInteraction()
+const Demo = ({ location }) => {
+  const [
+    pointerType,
+    prevPointerType,
+    pointerTypes,
+    canHover,
+    pointerAccuracy,
+  ] = useInteraction()
+  const [hover, setHover] = useState(false)
 
   const handleClick = event => {
     event.preventDefault()
     alert('clicked')
   }
 
+  const handleNavigate = () => {
+    alert('navigated')
+    navigate(location.pathname, {
+      state: {
+        page: {},
+      },
+      replace: true,
+    })
+  }
+
+  const toggleHover = event => {
+    canHover && setHover(current => !current)
+  }
+
   return (
     <div
       className="Demo"
-      data-user-interaction={interaction}
+      data-user-interaction={pointerType}
       data-user-can-hover={canHover}
     >
       <header>
         <img src={logo} className="React-logo" alt="logo" />
-        <h1>useInteraction</h1>
+        <h1 onClick={handleNavigate}>useInteraction</h1>
       </header>
       <main>
         <h3>
@@ -38,14 +60,20 @@ const Demo = () => {
         </h3>
         <p>
           <strong>
-            <code className="variable">interaction</code>
+            <code className="variable">pointerType</code>
           </strong>{' '}
-          provides the actual input used to navigate.
+          provides the current input used to navigate.
           <br /> <br />
           <strong>
-            <code className="variable">history</code>
+            <code className="variable">prevPointerType</code>
           </strong>{' '}
-          keeps a record of all user interaction types:{' '}
+          provides the previous input used to navigate.
+          <br /> <br />
+          <strong>
+            <code className="variable">pointerTypes</code>
+          </strong>{' '}
+          keeps a record of all user interaction types listed in reverse
+          chronological order :{' '}
           <i>
             that way a user that interacts both with mouse and touch can easily
             be detected.
@@ -55,17 +83,26 @@ const Demo = () => {
             <code className="variable">canHover</code>
           </strong>{' '}
           is a shorcut for any type of interaction except mouse:{' '}
-          <i>allows to display hidden information to the user in this case.</i>
+          <i>
+            to present to the user actions and information behind hover states
+            by example.
+          </i>
           <br />
           <br />
           <strong>
-            <code className="variable">accuracy</code>
+            <code className="variable">pointerAccuracy</code>
           </strong>{' '}
           is the max size collected of contact geometry of the pointer (by
           interaction type):{' '}
           <i>
-            the higher the number, the bigger the button size should be defined.
+            the higher the number, the larger the area that responds to user
+            input should be defined.
           </i>
+          [Experimental Feature]{' '}
+          <a href="https://caniuse.com/#feat=pointer" target="_blank">
+            Pointer events
+          </a>{' '}
+          is not supported in all browsers
         </p>
 
         <section id="image">
@@ -83,7 +120,7 @@ const Demo = () => {
             <br />
             <MouseOutlined /> <SwapHoriz /> <KeyboardOutlined />
           </div>
-          <figure interaction={interaction}>
+          <figure interaction={pointerType}>
             <a
               href="https://flic.kr/p/kq58ST"
               target="_blank"
@@ -147,7 +184,14 @@ const Demo = () => {
               <option value="1">1</option>
             </select>
             <textarea />
-            <button onClick={handleClick}>OKAY</button>
+            <div>{hover ? `hovered` : `-`}</div>
+            <button
+              onClick={handleClick}
+              onMouseEnter={toggleHover}
+              onMouseLeave={toggleHover}
+            >
+              OKAY
+            </button>
           </form>
           <h3>
             It can also help to provide to the user a visual indicator of the
@@ -156,21 +200,23 @@ const Demo = () => {
             <br />
             <i>
               Keyboard strokes has no effect on the interaction type when the
-              user is typing in a form element. Only keyboard navigation is
-              monitored.
+              user is typing in a form element (input, select and textarea).
+              Only keyboard navigation is monitored.
             </i>
           </h3>
         </section>
       </main>
       <footer>
         <code>
-          interaction: {interaction || `none`}
+          pointer: {pointerType || `none`}
           <br />
-          history: {`[${history.join(', ')}]`}
+          previous: {prevPointerType || `none`}
+          <br />
+          history: {`[${pointerTypes.join(', ')}]`}
           <br />
           can hover: {canHover.toString()}
           <br />
-          accuracy: {accuracy || `none`}
+          accuracy: {pointerAccuracy || `none`}
         </code>
       </footer>
     </div>

@@ -46,17 +46,25 @@ import React from 'react'
 import useInteraction from 'use-interaction'
 
 export const Demo = () => {
-  const [interaction, history, canHover, accuracy] = useInteraction()
+  const [
+    pointerType,
+    prevPointerType,
+    pointerTypes,
+    canHover,
+    pointerAccuracy,
+  ] = useInteraction()
 
   return (
     <code>
-      interaction: {interaction}
+      pointer: {pointerType}
       <br />
-      history: {history}
+      previous: {prevPointerType}
+      <br />
+      history: {pointerTypes}
       <br />
       can hover: {canHover}
       <br />
-      accuracy: {accuracy}
+      accuracy: {pointerAccuracy}
     </code>
   )
 }
@@ -70,7 +78,8 @@ export const Demo = () => {
 
 | Property Name    |   Type    | Description                                                                                                                                               | Default Value |
 | :--------------- | :-------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------: |
-| **initialHover** | `boolean` | to not wait an action on the part of the user, **canHover** can be defined via this parameter to be effective as soon as the page is loaded (i.e. `true`) |    `false`    |
+| **initialHover** | `boolean` | to not wait an action on the part of the user: **canHover** can be defined via this parameter to be effective as soon as the page is loaded (i.e. `true`) |    `false`    |
+| **debug**        | `boolean` | to activate debug mode (i.e. `true`)                                                                                                                      |    `false`    |
 
 <code>
   const [interaction, history, canHover, accuracy] = useInteraction({initialHover: true})
@@ -85,9 +94,10 @@ export const Demo = () => {
 - **canHover**: `boolean` - if the user can hover (i.e. `true`, default: `null`)
 - **accuracy**: `number` - pointer size in pixels (i.e. `23`, default: `null`), -->
 
-| Returned Array            |       Type       | Description                                                                 | Default Value |
-| :------------------------ | :--------------: | :-------------------------------------------------------------------------- | :-----------: |
-| 1st element (interaction) |     `string`     | interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `touch`) |    `null`     |
-| 2nd element (history)     | `Array.<string>` | all interaction types used from the load (i.e. `['touch', 'mouse']`}        |     `[]`      |
-| 3rd element (canHover)    |    `boolean`     | if the user can hover (i.e. `true`)                                         |    `false`    |
-| 4th element (accuracy)    |     `number`     | max pointer size in pixels by interaction type (i.e. `23`)                  |    `null`     |
+| Returned Array                |       Type       | Description                                                                             | Default Value |
+| :---------------------------- | :--------------: | :-------------------------------------------------------------------------------------- | :-----------: |
+| 1st element (pointerType)     |     `string`     | current interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `mouse`)     |    `null`     |
+| 2nd element (prevPointerType) |     `string`     | previous interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `keyboard`) |    `null`     |
+| 3rd element (pointerTypes)    | `Array.<string>` | all interaction types used from the load (i.e. `['touch', 'mouse']`}                    |     `[]`      |
+| 4th element (canHover)        |    `boolean`     | if the user can hover (i.e. `true`)                                                     |    `false`    |
+| 5th element (pointerAccuracy) |     `number`     | [Experimental] max pointer size in pixels by interaction type (i.e. `23`)               |    `null`     |

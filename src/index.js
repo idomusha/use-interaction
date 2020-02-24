@@ -3,8 +3,12 @@ import ReactDOM from 'react-dom'
 import './index.css'
 import Demo from './Demo'
 import * as serviceWorker from './serviceWorker'
+import { Router, Location } from '@reach/router'
 
-ReactDOM.render(<Demo />, document.getElementById('root'))
+ReactDOM.render(
+  <Location>{({ location }) => <Demo location={location} />}</Location>,
+  document.getElementById('root')
+)
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
