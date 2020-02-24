@@ -9,6 +9,21 @@
 ### Removed
  -->
 
+### Added
+
+- Previous pointer type
+- Debug mode
+- Examples on click/hover in demo page
+
+### Changed
+
+- History listed in reverse chronological order
+- README
+
+### Removed
+
+- Dependency for global state management
+
 ## [1.2.2] - 2020-02-16
 
 ### Added

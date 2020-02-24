@@ -6,8 +6,11 @@ const getKey = event => (event.keyCode ? event.keyCode : event.which)
 
 const getTarget = event => event.target || event.srcElement
 
-const useInteraction = ({ initialHover = false } = {}) => {
-  const [interaction, setInteraction] = useState(null)
+const useInteraction = ({ initialHover = false, debug = false } = {}) => {
+  const [pointerType, setPointerType] = useState(null)
+  const [pointerTypes, setPointerTypes] = useState([])
+  const [prevPointerType, setPrevPointerType] = useState(null)
+  const [pointerAccuracy, setPointerAccuracy] = useState(null)
   const [canHover, setCanHover] = useState(initialHover)
   const [firedEvent, setFiredEvent] = useState({
     touchStart: null,
@@ -15,9 +18,7 @@ const useInteraction = ({ initialHover = false } = {}) => {
     wheel: null,
     keyDown: null,
   })
-  const [history, setHistory] = useState([])
-  const [prevInteraction, setPrevInteraction] = useState(null)
-  const [accuracy, setAccuracy] = useState(null)
+
   const inputs = ['input', 'select', 'textarea']
   const keys = {
     9: 'tab',
@@ -35,20 +36,32 @@ const useInteraction = ({ initialHover = false } = {}) => {
     40: 'down arrow',
   }
 
-  const handleInteractionTouch = useCallback(() => {
-    setFiredEvent(current => ({
-      ...current,
-      touchStart: true,
-      mouseMove: false,
-    }))
+  const handleInteractionChange = nextPointer => {
+    setPointerType(nextPointer)
+  }
 
-    setHistory([...new Set([...history, 'touch'])])
-    setInteraction('touch')
-    setCanHover(false)
-  }, [history, setHistory])
+  const handleInteractionTouch = useCallback(
+    event => {
+      if (debug) console.log(event.type, event, firedEvent)
+
+      setFiredEvent(current => ({
+        ...current,
+        touchStart: true,
+        mouseMove: false,
+        wheel: false,
+      }))
+
+      if (pointerType === 'touch') return
+
+      handleInteractionChange('touch')
+    },
+    [pointerType]
+  )
 
   const handleInteractionMouse = useCallback(
     event => {
+      if (debug) console.log(event.type, event, firedEvent)
+
       // prevent false positive on mousemove with touch devices
       if (!firedEvent.touchStart) {
         setFiredEvent(current => ({
@@ -74,27 +87,28 @@ const useInteraction = ({ initialHover = false } = {}) => {
         keyDown: false,
       }))
 
+      if (pointerType === 'mouse') return
+
       if (
         firedEvent.mouseMove === null ||
         firedEvent.mouseMove === true ||
         firedEvent.touchStart === false
       ) {
-        setHistory([...new Set([...history, 'mouse'])])
-        setInteraction('mouse')
-        setCanHover(true)
+        handleInteractionChange('mouse')
       }
     },
     [
       firedEvent.touchStart,
       firedEvent.keyDown,
       firedEvent.mouseMove,
-      setHistory,
-      history,
+      pointerType,
     ]
   )
 
   const handleInteractionKeyboard = useCallback(
     event => {
+      if (debug) console.log(event.type, event, firedEvent)
+
       if (
         // if the key is a accessible key
         Object.prototype.hasOwnProperty.call(keys, getKey(event))
@@ -113,64 +127,78 @@ const useInteraction = ({ initialHover = false } = {}) => {
         setFiredEvent(current => ({
           ...current,
           keyDown: true,
+          touchStart: false,
           mouseMove: false,
           wheel: false,
         }))
 
-        if (interaction === 'keyboard') return
+        if (pointerType === 'keyboard') return
 
-        setHistory([...new Set([...history, 'keyboard'])])
-        setInteraction('keyboard')
-        setCanHover(false)
+        handleInteractionChange('keyboard')
       }
     },
-    [keys, inputs, interaction, setHistory, history]
+    [keys, inputs, pointerType]
   )
 
   const handleInteractionPointer = useCallback(
     event => {
+      if (debug) console.log(event.type, event, firedEvent)
+
       const nextAccuracy = round(event.height, 1)
-      if (nextAccuracy > accuracy || prevInteraction !== event.pointerType) {
-        setAccuracy(nextAccuracy)
+      if (
+        nextAccuracy > pointerAccuracy ||
+        prevPointerType !== event.pointerType
+      ) {
+        setPointerAccuracy(nextAccuracy)
       }
-      setPrevInteraction(event.pointerType)
     },
-    [accuracy, prevInteraction, setAccuracy, setPrevInteraction]
+    [pointerAccuracy, prevPointerType]
   )
 
   useEffect(() => {
     window.addEventListener('touchstart', handleInteractionTouch, false)
-    if (firedEvent.mouseMove || firedEvent.wheel) {
+    window.addEventListener('keydown', handleInteractionKeyboard, false)
+    window.addEventListener('pointerdown', handleInteractionPointer, false)
+
+    return () => {
+      window.removeEventListener('touchstart', handleInteractionTouch, false)
+      window.removeEventListener('keydown', handleInteractionKeyboard, false)
+      window.removeEventListener('pointerdown', handleInteractionPointer, false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (firedEvent.mouseMove === true || firedEvent.wheel === true) {
       window.removeEventListener('mousemove', handleInteractionMouse, false)
       window.removeEventListener('wheel', handleInteractionMouse, false)
     } else {
       window.addEventListener('mousemove', handleInteractionMouse, false)
       window.addEventListener('wheel', handleInteractionMouse, false)
     }
-    window.addEventListener('keydown', handleInteractionKeyboard, false)
-    window.addEventListener('pointerdown', handleInteractionPointer, false)
 
     return () => {
-      window.removeEventListener('touchstart', handleInteractionTouch, false)
       window.removeEventListener('mousemove', handleInteractionMouse, false)
       window.removeEventListener('wheel', handleInteractionMouse, false)
-      window.removeEventListener('keydown', handleInteractionKeyboard, false)
-      window.removeEventListener('pointerdown', handleInteractionPointer, false)
     }
-  }, [
-    firedEvent.mouseMove,
-    firedEvent.wheel,
-    handleInteractionTouch,
-    handleInteractionMouse,
-    handleInteractionKeyboard,
-    handleInteractionPointer,
-  ])
+  }, [firedEvent])
 
-  return [interaction, history, canHover, accuracy]
+  useEffect(() => {
+    if (pointerType) {
+      let index = pointerTypes.filter(p => p !== pointerType)
+      index.push(pointerType)
+      setCanHover(pointerType === 'mouse')
+      if (index.length > 1) setPrevPointerType(index[index.length - 2])
+
+      setPointerTypes(index)
+    }
+  }, [pointerType])
+
+  return [pointerType, prevPointerType, pointerTypes, canHover, pointerAccuracy]
 }
 
 useInteraction.propTypes = {
   initialHover: PropTypes.boolean,
+  debug: PropTypes.boolean,
 }
 
 export default useInteraction
