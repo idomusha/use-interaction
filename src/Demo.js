@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useLayoutEffect, useRef } from 'react'
 import {
   MouseOutlined,
   TouchAppOutlined,
@@ -7,20 +7,38 @@ import {
 } from '@material-ui/icons'
 import { navigate } from '@reach/router'
 
+import useInteraction from './useInteraction'
+
 import logo from './logo.svg'
 import './Reset.scss'
 import './Demo.scss'
-import useInteraction from './useInteraction'
+import Styled from './Demo.styles'
 
 const Demo = ({ location }) => {
-  const [
-    pointerType,
-    prevPointerType,
-    pointerTypes,
-    canHover,
-    pointerAccuracy,
-  ] = useInteraction()
+  const [pointerType, pointerHistory, pointerAccuracy] = useInteraction({
+    initial: null,
+  })
   const [hover, setHover] = useState(false)
+  const [imageHeight, setImageHeight] = useState(null)
+  const [figcaptionHeight, setFigcaptionHeight] = useState(null)
+  const imageRef = useRef(null)
+  const figcaptionRef = useRef(null)
+
+  const updateFigureSize = () => {
+    setImageHeight(imageRef.current.offsetHeight)
+    setFigcaptionHeight(figcaptionRef.current.offsetHeight)
+  }
+
+  useLayoutEffect(() => {
+    let img = new Image()
+    img.src = imageRef.current.src
+    img.onload = () => {
+      updateFigureSize()
+    }
+
+    window.addEventListener('resize', updateFigureSize)
+    return () => window.removeEventListener('resize', updateFigureSize)
+  }, [])
 
   const handleClick = event => {
     event.preventDefault()
@@ -38,14 +56,15 @@ const Demo = ({ location }) => {
   }
 
   const toggleHover = event => {
-    canHover && setHover(current => !current)
+    pointerType === 'mouse' && setHover(current => !current)
   }
 
   return (
-    <div
+    <Styled.Demo
       className="Demo"
+      pointer={pointerType}
       data-user-interaction={pointerType}
-      data-user-can-hover={canHover}
+      data-user-can-hover={pointerType === 'mouse'}
     >
       <header>
         <img src={logo} className="React-logo" alt="logo" />
@@ -62,53 +81,35 @@ const Demo = ({ location }) => {
           <strong>
             <code className="variable">pointerType</code>
           </strong>{' '}
-          provides the current input used to navigate.
+          provides the current input of the user interaction.
           <br /> <br />
           <strong>
-            <code className="variable">prevPointerType</code>
+            <code className="variable">pointerHistory</code>
           </strong>{' '}
-          provides the previous input used to navigate.
+          keeps a record of previous inputs of the user interaction listed in
+          reverse chronological order.
           <br /> <br />
-          <strong>
-            <code className="variable">pointerTypes</code>
-          </strong>{' '}
-          keeps a record of all user interaction types listed in reverse
-          chronological order :{' '}
-          <i>
-            that way a user that interacts both with mouse and touch can easily
-            be detected.
-          </i>
-          <br /> <br />
-          <strong>
-            <code className="variable">canHover</code>
-          </strong>{' '}
-          is a shorcut for any type of interaction except mouse:{' '}
-          <i>
-            to present to the user actions and information behind hover states
-            by example.
-          </i>
-          <br />
-          <br />
           <strong>
             <code className="variable">pointerAccuracy</code>
           </strong>{' '}
-          is the max size collected of contact geometry of the pointer (by
-          interaction type):{' '}
-          <i>
-            the higher the number, the larger the area that responds to user
-            input should be defined.
-          </i>
+          is the max size of contact geometry collected from the current
+          pointer.
+          <br />
           [Experimental Feature]{' '}
-          <a href="https://caniuse.com/#feat=pointer" target="_blank">
-            Pointer events
-          </a>{' '}
-          is not supported in all browsers
+          <i>
+            Not all browsers yet support{' '}
+            <a
+              href="https://caniuse.com/#feat=pointer"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Pointer events
+            </a>
+          </i>
         </p>
 
         <section id="image">
-          <h2>
-            w/ <code>canHover</code>
-          </h2>
+          <h2>detect hover capability</h2>
           <div>
             <MouseOutlined /> <SwapHoriz /> <TouchAppOutlined />
             <br />
@@ -120,18 +121,22 @@ const Demo = ({ location }) => {
             <br />
             <MouseOutlined /> <SwapHoriz /> <KeyboardOutlined />
           </div>
-          <figure interaction={pointerType}>
+          <Styled.Figure
+            pointer={pointerType}
+            size={[imageHeight, figcaptionHeight]}
+          >
             <a
               href="https://flic.kr/p/kq58ST"
               target="_blank"
               rel="noopener noreferrer"
             >
               <img
+                ref={imageRef}
                 src="https://farm8.staticflickr.com/7353/12743181443_9dfd24a886_z.jpg"
                 alt="Beautiful light"
               />
             </a>
-            <figcaption>
+            <figcaption ref={figcaptionRef}>
               <h3>
                 <a
                   href="https://flic.kr/p/kq58ST"
@@ -158,16 +163,15 @@ const Demo = ({ location }) => {
                 bed watching its sleeping occupant.
               </p>
             </figcaption>
-          </figure>
+          </Styled.Figure>
           <h3>
-            It can be used to have different displays depending on whether or
-            not the user can hover.
+            It can be used to present to the user actions and information behind
+            hover states; in place of the hover CSS media feature{' '}
+            <code>@media (hover: hover)</code>, not supported by all browsers.
           </h3>
         </section>
         <section id="form">
-          <h2>
-            w/ <code>interaction</code>
-          </h2>
+          <h2>detect keyboard navigation</h2>
           <div>
             <MouseOutlined /> <SwapHoriz /> <KeyboardOutlined />
             <br />
@@ -194,13 +198,14 @@ const Demo = ({ location }) => {
             </button>
           </form>
           <h3>
-            It can also help to provide to the user a visual indicator of the
-            element that currently has keyboard focus.
+            It can also help to provide the keyboard users with a visual
+            indicator of the element (link, button, and form control) that
+            currently has focus.
             <br />
             <br />
             <i>
               Keyboard strokes has no effect on the interaction type when the
-              user is typing in a form element (input, select and textarea).
+              user is typing in a form element (input, select, and textarea).
               Only keyboard navigation is monitored.
             </i>
           </h3>
@@ -210,16 +215,14 @@ const Demo = ({ location }) => {
         <code>
           pointer: {pointerType || `none`}
           <br />
-          previous: {prevPointerType || `none`}
+          history: {`[${pointerHistory.join(', ')}]`}
           <br />
-          history: {`[${pointerTypes.join(', ')}]`}
-          <br />
-          can hover: {canHover.toString()}
+          can hover: {(pointerType === 'mouse').toString()}
           <br />
           accuracy: {pointerAccuracy || `none`}
         </code>
       </footer>
-    </div>
+    </Styled.Demo>
   )
 }
 

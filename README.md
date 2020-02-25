@@ -32,11 +32,11 @@ import useInteraction from 'use-interaction'
 
 ### Following user interaction type
 
-If the user interaction changes, the `interaction`, `history`, `canHover` and `accuracy` values will be updated.
-Keyboard strokes has no effect on the interaction type when the user is typing in a form element. Only keyboard navigation is monitored.
+If the user interaction changes, the `pointerType`, `pointerHistory`, and `pointerAccuracy` values will be updated.
+Keyboard strokes has no effect on the interaction type when the user is typing in a form element (input, select, and textarea). Only keyboard navigation is monitored.
 
 ```javascript
-const [interaction, history, canHover, accuracy] = useInteraction()
+const [pointerType, pointerHistory, pointerAccuracy] = useInteraction()
 ```
 
 ### Full example
@@ -46,25 +46,17 @@ import React from 'react'
 import useInteraction from 'use-interaction'
 
 export const Demo = () => {
-  const [
-    pointerType,
-    prevPointerType,
-    pointerTypes,
-    canHover,
-    pointerAccuracy,
-  ] = useInteraction()
+  const [pointerType, pointerHistory, pointerAccuracy] = useInteraction()
 
   return (
     <code>
-      pointer: {pointerType}
+      pointer: {pointerType || `none`}
       <br />
-      previous: {prevPointerType}
+      history: {`[${pointerHistory.join(', ')}]`}
       <br />
-      history: {pointerTypes}
+      can hover: {(pointerType === 'mouse').toString()}
       <br />
-      can hover: {canHover}
-      <br />
-      accuracy: {pointerAccuracy}
+      accuracy: {pointerAccuracy || `none`}
     </code>
   )
 }
@@ -76,28 +68,25 @@ export const Demo = () => {
 
 `object`
 
-| Property Name    |   Type    | Description                                                                                                                                               | Default Value |
-| :--------------- | :-------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------: |
-| **initialHover** | `boolean` | to not wait an action on the part of the user: **canHover** can be defined via this parameter to be effective as soon as the page is loaded (i.e. `true`) |    `false`    |
-| **debug**        | `boolean` | to activate debug mode (i.e. `true`)                                                                                                                      |    `false`    |
+| Property Name |   Type    | Description                                                                                                                                             | Default Value |
+| :------------ | :-------: | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :-----------: |
+| **initial**   | `boolean` | to not wait an action on the part of the user, the initial interaction type can be defined to be effective as soon as the page is loaded (i.e. `touch`) |    `null`     |
+| **debug**     | `boolean` | to activate debug mode (i.e. `true`)                                                                                                                    |    `false`    |
 
-<code>
-  const [interaction, history, canHover, accuracy] = useInteraction({initialHover: true})
-</code>
+```javascript
+import { isMobile } from 'react-device-detect'
+
+const [pointerType, pointerHistory, pointerAccuracy] = useInteraction({
+  initial: isMobile ? 'touch' : 'mouse',
+})
+```
 
 ### `useInteraction()` output
 
 `array`
 
-<!-- - **interaction**: `string` - interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `touch`, default: `null`)
-- **history**: `Array.<string>` - all interaction types used from the load (i.e. `['touch', 'mouse']`, default: `[]`),
-- **canHover**: `boolean` - if the user can hover (i.e. `true`, default: `null`)
-- **accuracy**: `number` - pointer size in pixels (i.e. `23`, default: `null`), -->
-
-| Returned Array                |       Type       | Description                                                                             | Default Value |
-| :---------------------------- | :--------------: | :-------------------------------------------------------------------------------------- | :-----------: |
-| 1st element (pointerType)     |     `string`     | current interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `mouse`)     |    `null`     |
-| 2nd element (prevPointerType) |     `string`     | previous interaction type of the user: `touch`, `mouse` or `keyboard` (i.e. `keyboard`) |    `null`     |
-| 3rd element (pointerTypes)    | `Array.<string>` | all interaction types used from the load (i.e. `['touch', 'mouse']`}                    |     `[]`      |
-| 4th element (canHover)        |    `boolean`     | if the user can hover (i.e. `true`)                                                     |    `false`    |
-| 5th element (pointerAccuracy) |     `number`     | [Experimental] max pointer size in pixels by interaction type (i.e. `23`)               |    `null`     |
+| Returned Array                |       Type       | Description                                                                                                  | Default Value |
+| :---------------------------- | :--------------: | :----------------------------------------------------------------------------------------------------------- | :-----------: |
+| 1st element (pointerType)     |     `string`     | current input of the user interaction: `touch`, `mouse` or `keyboard` (i.e. `touch`)                         |    `null`     |
+| 2nd element (pointerHistory)  | `Array.<string>` | previous inputs of the user interaction listed in reverse chronological order (i.e. `['mouse', 'keyboard']`} |     `[]`      |
+| 3rd element (pointerAccuracy) |     `number`     | [Experimental] max size of contact geometry collected from the current pointer (i.e. `23`)                   |    `null`     |

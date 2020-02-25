@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import './index.css'
 import Demo from './Demo'
 import * as serviceWorker from './serviceWorker'
-import { Router, Location } from '@reach/router'
+import { Location } from '@reach/router'
 
 ReactDOM.render(
   <Location>{({ location }) => <Demo location={location} />}</Location>,

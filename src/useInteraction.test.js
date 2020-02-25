@@ -11,17 +11,15 @@ test('should init interaction type of the user', () => {
 
   expect(result.current[0]).toBe(null)
   expect(result.current[1]).toMatchObject([])
-  expect(result.current[2]).toBeFalsy()
-  expect(result.current[3]).toBe(null)
+  expect(result.current[2]).toBe(null)
 })
 
-test('should init interaction type of the user with initialHover', () => {
-  const { result } = renderHook(() => useInteraction({ initialHover: true }))
+test('should init interaction type of the user with initialPointerType', () => {
+  const { result } = renderHook(() => useInteraction({ initial: 'touch' }))
 
-  expect(result.current[0]).toBe(null)
+  expect(result.current[0]).toBe('touch')
   expect(result.current[1]).toMatchObject([])
-  expect(result.current[2]).toBeTruthy()
-  expect(result.current[3]).toBe(null)
+  expect(result.current[2]).toBe(null)
 })
 
 test('should set interaction type of the user to touch', () => {
@@ -32,7 +30,6 @@ test('should set interaction type of the user to touch', () => {
   })
 
   expect(result.current[0]).toBe('touch')
-  expect(result.current[2]).toBeFalsy()
 })
 
 test('should set interaction type of the user to mouse', () => {
@@ -43,7 +40,6 @@ test('should set interaction type of the user to mouse', () => {
   })
 
   expect(result.current[0]).toBe('mouse')
-  expect(result.current[2]).toBeTruthy()
 })
 
 test('should set interaction type of the user to keyboard', () => {
@@ -59,7 +55,6 @@ test('should set interaction type of the user to keyboard', () => {
   })
 
   expect(result.current[0]).toBe('keyboard')
-  expect(result.current[2]).toBeFalsy()
   unmount()
 })
 
@@ -100,7 +95,6 @@ test('should not set interaction type of the user to keyboard when user is typin
   })
 
   expect(result.current[0]).toBe('mouse')
-  expect(result.current[2]).toBeTruthy()
 })
 
 test('should set interaction type of the user to touch and then to mouse', () => {
@@ -114,7 +108,6 @@ test('should set interaction type of the user to touch and then to mouse', () =>
   wait(() => {
     expect(result.current[0]).toBe('mouse')
     expect(result.current[1]).toMatchObject(['touch', 'mouse'])
-    expect(result.current[2]).toBeTruthy()
   })
 })
 
@@ -127,8 +120,30 @@ test('should set interaction type of the user to keyboard and then to mouse', ()
       key: 'Tab',
       code: 'Tab',
       keyCode: 9,
-      which: 9,
+      which: undefined,
+      target: document.body,
+      srcElement: undefined,
     })
+  })
+
+  wait(() => {
+    expect(result.current[0]).toBe('keyboard')
+  })
+
+  act(() => {
+    fireEvent.wheel(document.body, {})
+    fireEvent.keyDown(getByTestId('test-input'), {
+      key: 'Tab',
+      code: 'Tab',
+      keyCode: undefined,
+      which: 9,
+      target: undefined,
+      srcElement: document.body,
+    })
+  })
+
+  wait(() => {
+    expect(result.current[0]).toBe('keyboard')
   })
 
   act(() => {
@@ -138,22 +153,37 @@ test('should set interaction type of the user to keyboard and then to mouse', ()
   wait(() => {
     expect(result.current[0]).toBe('mouse')
     expect(result.current[1]).toMatchObject(['keyboard', 'mouse'])
-    expect(result.current[2]).toBeTruthy()
   })
 })
 
 test('should set accuracy of the pointer', () => {
   const { result } = renderHook(() => useInteraction())
 
-  const pointerDown = createEvent.pointerDown(document.body, {
+  const pointerDown1 = createEvent.pointerDown(document.body, {
+    height: 5,
+  })
+  const pointerDown2 = createEvent.pointerDown(document.body, {
     height: 23.666666666,
+  })
+  const pointerDown3 = createEvent.pointerDown(document.body, {
+    height: 1,
   })
 
   act(() => {
-    fireEvent(document.body, pointerDown)
+    fireEvent(document.body, pointerDown1)
+    fireEvent(document.body, pointerDown2)
   })
 
   wait(() => {
-    expect(result.current[3]).toBe(23.7)
+    expect(result.current[2]).toBe(23.7)
+  })
+
+  act(() => {
+    fireEvent.mouseMove(document.body, {})
+    fireEvent(document.body, pointerDown3)
+  })
+
+  wait(() => {
+    expect(result.current[2]).toBe(1)
   })
 })

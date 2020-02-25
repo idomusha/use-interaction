@@ -12,27 +12,13 @@ select:-moz-focusring {
   text-shadow: 0 0 0 #000;
 }
 
-:focus {
-  outline: none;
-}
-
-.Demo[data-user-interaction='keyboard'] *:focus {
-  outline: 2px solid #61dafb;
-  outline-offset: -1px;
-}
-.Demo[data-user-interaction='keyboard'] a:focus {
-  outline: none;
-  color: #61dafb;
-  padding: 0.1rem 0.3rem;
-  margin: 0 -0.3rem;
-}
-
 figure {
   background-color: #61dafb;
   width: 640px;
   max-width: calc(100vw - 3rem);
   margin: 0;
   position: relative;
+  overflow: hidden;
 
   h3 {
     font-weight: 700;
@@ -43,59 +29,18 @@ figure {
   img {
     width: 100%;
     opacity: 0.66;
-    transform: translate3d(0, 0, 0);
-    transition: transform 0.3s ease;
   }
   figcaption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
     width: 100%;
     height: 144px;
     padding: 20px;
     background-color: #1d1d1d;
     color: #fff;
-    transform: translate3d(0, 144px, 0);
-    transition: transform 0.3s ease;
     a {
       color: #fff;
     }
     .description {
       margin-bottom: 0;
-    }
-  }
-  @at-root {
-    .Demo[data-user-can-hover='true'] #{&} {
-      overflow: hidden;
-
-      &:hover {
-        figcaption {
-          transform: translate3d(0, 0, 0);
-        }
-        img {
-          transform: translate3d(0, -144px, 0);
-        }
-      }
-    }
-    .Demo[data-user-can-hover='false'] #{&} {
-      img {
-        transition: none;
-      }
-
-      figcaption {
-        transition: none;
-        transform: translate3d(0, 0, 0);
-        position: relative;
-        bottom: auto;
-        left: auto;
-        height: auto;
-      }
-
-      &:hover {
-        figcaption {
-          transition: transform 0.3s ease;
-        }
-      }
     }
   }
 }

@@ -9,19 +9,22 @@
 ### Removed
  -->
 
+## [1.3.0] - 2020-02-25
+
 ### Added
 
-- Previous pointer type
 - Debug mode
-- Examples on click/hover in demo page
+- Examples on hover/click and with Styled Components
 
 ### Changed
 
 - History listed in reverse chronological order
-- README
+- History don't show the current input anymore
+- Initial canHover becomes initial pointerType
 
 ### Removed
 
+- canHover
 - Dependency for global state management
 
 ## [1.2.2] - 2020-02-16
