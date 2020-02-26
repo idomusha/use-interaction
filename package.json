@@ -1,6 +1,6 @@
 {
   "name": "use-interaction",
-  "version": "1.2.2",
+  "version": "2.0.0-beta.1",
   "private": false,
   "description": "React hook for getting and following user interaction type",
   "keywords": [
@@ -22,7 +22,7 @@
     "url": "https://github.com/idomusha/use-interaction/issues"
   },
   "homepage": "https://idomusha.github.io/use-interaction/",
-  "main": "src/useInteraction.js",
+  "main": "dist/useInteraction.min.js",
   "files": [
     "dist/*"
   ],
@@ -42,18 +42,13 @@
       "pre-push": "npm run lint"
     }
   },
-  "dependencies": {
-    "@reach/router": "^1.3.1",
-    "lodash": "^4.17.15",
-    "react": "^16.12.0"
-  },
   "devDependencies": {
-    "@material-ui/core": "^4.9.2",
+    "@material-ui/core": "^4.9.4",
     "@material-ui/icons": "^4.9.1",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
+    "@reach/router": "^1.3.1",
+    "@testing-library/jest-dom": "^5.1.1",
+    "@testing-library/react": "^9.4.1",
     "@testing-library/react-hooks": "^3.2.1",
-    "@testing-library/user-event": "^7.1.2",
     "babel-preset-react": "^6.24.1",
     "coveralls": "^3.0.9",
     "eslint": "^6.8.0",
@@ -63,23 +58,28 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.18.3",
-    "eslint-plugin-react-hooks": "^2.3.0",
+    "eslint-plugin-react-hooks": "^2.5.0",
     "gh-pages": "^2.2.0",
-    "husky": "^4.2.1",
+    "husky": "^4.2.3",
     "lodash": "^4.17.15",
     "node-sass": "^4.13.1",
     "prettier": "^1.19.1",
     "prop-types": "^15.7.2",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "react-scripts": "3.3.1",
-    "react-test-renderer": "^16.12.0",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "react-scripts": "3.4.0",
+    "react-test-renderer": "^16.13.0",
     "rollup": "^1.31.1",
     "rollup-plugin-terser": "^5.2.0",
     "styled-components": "^5.0.1"
   },
   "peerDependencies": {
-    "react": "^16.12.0"
+    "react": "^16.13.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.15",
+    "react": "^16.13.0",
+    "ulog": "^1.1.0"
   },
   "eslintConfig": {
     "extends": "react-app"

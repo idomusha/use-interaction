@@ -6,7 +6,7 @@
 
 React hook `useInteraction()` allows to get the user interaction type: `touch`, `mouse` or `keyboard`.
 
-### ▶︎ [Demo](https://idomusha.github.io/use-interaction/)
+### ▶︎ [Demo](https://idomusha.github.io/use-interaction/?log=debug)
 
 ## Installation
 
@@ -50,13 +50,13 @@ export const Demo = () => {
 
   return (
     <code>
-      pointer: {pointerType || `none`}
+      pointer: {pointerType || `none`} (can
+      {pointerType !== 'mouse' && 'not'} hover)
       <br />
       history: {`[${pointerHistory.join(', ')}]`}
       <br />
-      can hover: {(pointerType === 'mouse').toString()}
-      <br />
       accuracy: {pointerAccuracy || `none`}
+      <br />
     </code>
   )
 }
@@ -71,7 +71,6 @@ export const Demo = () => {
 | Property Name |   Type    | Description                                                                                                                                             | Default Value |
 | :------------ | :-------: | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :-----------: |
 | **initial**   | `boolean` | to not wait an action on the part of the user, the initial interaction type can be defined to be effective as soon as the page is loaded (i.e. `touch`) |    `null`     |
-| **debug**     | `boolean` | to activate debug mode (i.e. `true`)                                                                                                                    |    `false`    |
 
 ```javascript
 import { isMobile } from 'react-device-detect'

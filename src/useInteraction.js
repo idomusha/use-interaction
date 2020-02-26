@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { round } from 'lodash'
-
-import Log from './Log'
+import ulog from 'ulog'
+const log = ulog('use-interaction')
 
 const getKey = event => (event.keyCode ? event.keyCode : event.which)
-
-const getTarget = event => event.target || event.srcElement
+let handleInteractionPointer = null
 
 const useInteraction = ({ initial = null } = {}) => {
   const initialPointerType =
@@ -15,14 +14,13 @@ const useInteraction = ({ initial = null } = {}) => {
       ? initial
       : null
   const [pointerType, setPointerType] = useState(initialPointerType)
-  const [prevPointerType, setPrevPointerType] = useState(null)
   const [pointerHistory, setPointerHistory] = useState([])
   const [pointerAccuracy, setPointerAccuracy] = useState(null)
   const [firedEvent, setFiredEvent] = useState({
-    touchStart: null,
-    mouseMove: null,
+    touchstart: null,
+    mousemove: null,
     wheel: null,
-    keyDown: null,
+    keydown: null,
   })
 
   const inputs = ['input', 'select', 'textarea']
@@ -42,77 +40,60 @@ const useInteraction = ({ initial = null } = {}) => {
     40: 'down arrow',
   }
 
-  const handleInteractionChange = useCallback(
-    nextPointer => {
-      setPrevPointerType(pointerType)
-      setPointerType(nextPointer)
+  const handleInteractionChange = useCallback(event => {
+    log.info(event, event.type)
+
+    setFiredEvent(current => ({
+      ...current,
+      ...(['touchstart', 'keydown'].includes(event.type) && {
+        [event.type]: true,
+        [['touchstart', 'keydown'].find(e => e !== event.type)]: null,
+        mousemove: false,
+        wheel: null,
+      }),
+      ...(event.type === 'mousemove' && {
+        mousemove: current.mousemove === false ? null : true,
+        touchstart: current.mousemove === false ? true : null,
+        keydown: null,
+      }),
+      ...(event.type === 'wheel' && {
+        wheel: true,
+        touchstart: null,
+        keydown: null,
+      }),
+    }))
+  }, [])
+
+  const setInteraction = useCallback(
+    nextPointerType => {
+      setPointerHistory(current =>
+        [pointerType, ...current].reduce((pointers, pointer) => {
+          if (pointer !== null && pointer !== nextPointerType)
+            pointers.push(pointer)
+          return pointers
+        }, [])
+      )
+      setPointerType(nextPointerType)
     },
     [pointerType]
   )
 
   const handleInteractionTouch = useCallback(
     event => {
-      Log.info(event.type, event, firedEvent)
-
-      setFiredEvent(current => ({
-        ...current,
-        touchStart: true,
-        mouseMove: false,
-        wheel: false,
-      }))
-
-      if (pointerType === 'touch') return
-
-      handleInteractionChange('touch')
+      handleInteractionChange(event)
     },
-    [firedEvent, pointerType, handleInteractionChange]
+    [handleInteractionChange]
   )
 
   const handleInteractionMouse = useCallback(
     event => {
-      Log.info(event.type, event, firedEvent)
-
-      // prevent false positive on mousemove with touch devices
-      if (!firedEvent.touchStart) {
-        setFiredEvent(current => ({
-          ...current,
-          ...(event.type === 'mousemove' && { mouseMove: true }),
-          ...(event.type === 'wheel' && { wheel: true }),
-        }))
-      }
-
-      // prevent false positive on mousemove when navigate with keyboard
-      if (firedEvent.keyDown) {
-        setFiredEvent(current => ({
-          ...current,
-          mouseMove: false,
-        }))
-      }
-
-      // reset interaction markers
-      setFiredEvent(current => ({
-        ...current,
-        touchStart: false,
-        keyDown: false,
-      }))
-
-      if (pointerType === 'mouse') return
-
-      if (
-        firedEvent.mouseMove === null ||
-        firedEvent.mouseMove === true ||
-        firedEvent.touchStart === false
-      ) {
-        handleInteractionChange('mouse')
-      }
+      handleInteractionChange(event)
     },
-    [firedEvent, pointerType, handleInteractionChange]
+    [handleInteractionChange]
   )
 
   const handleInteractionKeyboard = useCallback(
     event => {
-      Log.info(event.type, event, firedEvent)
-
       if (
         // if the key is a accessible key
         Object.prototype.hasOwnProperty.call(keys, getKey(event))
@@ -121,43 +102,30 @@ const useInteraction = ({ initial = null } = {}) => {
           // if the key is `TAB`
           keys[getKey(event)] !== 'tab' &&
           // only if the target is one of the elements in `inputs` list
-          inputs.indexOf(getTarget(event).nodeName.toLowerCase()) >= 0
+          inputs.indexOf(event.target && event.target.nodeName.toLowerCase()) >=
+            0
         ) {
           // ignore navigation keys typing on form elements
           return
         }
 
-        // some pressed keys causes an event mousemove
-        setFiredEvent(current => ({
-          ...current,
-          keyDown: true,
-          touchStart: false,
-          mouseMove: false,
-          wheel: false,
-        }))
-
-        if (pointerType === 'keyboard') return
-
-        setPointerAccuracy(null)
-        handleInteractionChange('keyboard')
+        handleInteractionChange(event)
       }
     },
-    [firedEvent, keys, inputs, pointerType, handleInteractionChange]
+    [keys, inputs, handleInteractionChange]
   )
 
-  const handleInteractionPointer = useCallback(
+  handleInteractionPointer = useCallback(
     event => {
-      Log.info(event.type, event, firedEvent)
+      log.info(event, event.type)
 
       const nextAccuracy = round(event.height, 1)
-      if (
-        nextAccuracy > pointerAccuracy ||
-        pointerHistory[0] !== event.pointerType
-      ) {
+
+      if (nextAccuracy > pointerAccuracy) {
         setPointerAccuracy(nextAccuracy)
       }
     },
-    [firedEvent, pointerAccuracy, pointerHistory]
+    [pointerAccuracy]
   )
 
   useEffect(() => {
@@ -170,14 +138,10 @@ const useInteraction = ({ initial = null } = {}) => {
       window.removeEventListener('keydown', handleInteractionKeyboard, false)
       window.removeEventListener('pointerdown', handleInteractionPointer, false)
     }
-  }, [
-    handleInteractionKeyboard,
-    handleInteractionPointer,
-    handleInteractionTouch,
-  ])
+  }, [handleInteractionTouch, handleInteractionKeyboard])
 
   useEffect(() => {
-    if (firedEvent.mouseMove === true || firedEvent.wheel === true) {
+    if (firedEvent.mousemove === true || firedEvent.wheel === true) {
       window.removeEventListener('mousemove', handleInteractionMouse, false)
       window.removeEventListener('wheel', handleInteractionMouse, false)
     } else {
@@ -189,26 +153,28 @@ const useInteraction = ({ initial = null } = {}) => {
       window.removeEventListener('mousemove', handleInteractionMouse, false)
       window.removeEventListener('wheel', handleInteractionMouse, false)
     }
-  }, [firedEvent.mouseMove, firedEvent.wheel, handleInteractionMouse])
+  }, [firedEvent, handleInteractionMouse])
 
   useEffect(() => {
-    if (pointerType) {
-      setPointerHistory(current => {
-        return [...current, prevPointerType].reduce((pointers, pointer) => {
-          if (pointer !== null && pointer !== pointerType)
-            pointers.unshift(pointer)
-          return pointers
-        }, [])
-      })
-    }
-  }, [pointerType, prevPointerType])
+    log.log([pointerType, [...pointerHistory], pointerAccuracy])
+  }, [pointerType, pointerHistory, pointerAccuracy])
+
+  useEffect(() => {
+    log.info('firedEvent', { ...firedEvent })
+
+    if (firedEvent.touchstart) setInteraction('touch')
+    if (firedEvent.mousemove || firedEvent.wheel) setInteraction('mouse')
+    if (firedEvent.keydown) setInteraction('keyboard')
+    if (firedEvent.mousemove || firedEvent.wheel || firedEvent.keydown)
+      setPointerAccuracy(null)
+  }, [firedEvent, setInteraction])
 
   return [pointerType, pointerHistory, pointerAccuracy]
 }
 
 useInteraction.propTypes = {
-  initialHover: PropTypes.boolean,
-  debug: PropTypes.boolean,
+  initial: PropTypes.boolean,
 }
 
 export default useInteraction
+export { handleInteractionPointer, log }

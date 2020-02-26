@@ -213,13 +213,13 @@ const Demo = ({ location }) => {
       </main>
       <footer>
         <code>
-          pointer: {pointerType || `none`}
+          pointer: {pointerType || `none`} (can
+          {pointerType !== 'mouse' && 'not'} hover)
           <br />
           history: {`[${pointerHistory.join(', ')}]`}
           <br />
-          can hover: {(pointerType === 'mouse').toString()}
-          <br />
           accuracy: {pointerAccuracy || `none`}
+          <br />
         </code>
       </footer>
     </Styled.Demo>

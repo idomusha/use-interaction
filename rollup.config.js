@@ -10,9 +10,10 @@ export default {
       react: 'React',
       'prop-types': 'PropTypes',
       lodash: 'lodash',
-      reactn: 'reactn',
+      ulog: 'ulog',
     },
+    exports: 'named',
   },
-  external: ['react', 'prop-types', 'lodash', 'reactn'],
+  external: ['react', 'prop-types', 'lodash', 'ulog'],
   plugins: [terser()],
 }
