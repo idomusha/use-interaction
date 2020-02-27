@@ -9,7 +9,13 @@
 ### Removed
  -->
 
-## [2.0.0-beta.1] - 2020-02-16
+## [2.0.0-beta.2] - 2020-02-26
+
+### Fixed
+
+- History between keyboard and mouse
+
+## [2.0.0-beta.1] - 2020-02-26
 
 ### Added
 

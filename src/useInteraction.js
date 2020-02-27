@@ -48,7 +48,7 @@ const useInteraction = ({ initial = null } = {}) => {
       ...(['touchstart', 'keydown'].includes(event.type) && {
         [event.type]: true,
         [['touchstart', 'keydown'].find(e => e !== event.type)]: null,
-        mousemove: false,
+        mousemove: event.type === 'touchstart' ? false : null,
         wheel: null,
       }),
       ...(event.type === 'mousemove' && {
@@ -154,10 +154,6 @@ const useInteraction = ({ initial = null } = {}) => {
       window.removeEventListener('wheel', handleInteractionMouse, false)
     }
   }, [firedEvent, handleInteractionMouse])
-
-  useEffect(() => {
-    log.log([pointerType, [...pointerHistory], pointerAccuracy])
-  }, [pointerType, pointerHistory, pointerAccuracy])
 
   useEffect(() => {
     log.info('firedEvent', { ...firedEvent })
