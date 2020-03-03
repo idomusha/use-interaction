@@ -2,7 +2,7 @@ import React from 'react'
 import { renderHook, cleanup, act } from '@testing-library/react-hooks'
 import { render, fireEvent } from '@testing-library/react'
 
-import useInteraction, { handleInteractionPointer, log } from './useInteraction'
+import useInteraction, { setMaxPointerSize, log } from './useInteraction'
 
 if (process.env.NODE_ENV === 'test') {
   log.level = log.NONE
@@ -184,7 +184,7 @@ test('should set accuracy of the pointer', () => {
       pointerType: 'touch',
       type: 'pointerdown',
     }
-    handleInteractionPointer(PointerEvent)
+    setMaxPointerSize(PointerEvent)
     fireEvent.touchStart(getByTestId('test-div'), { type: 'touchstart' })
     fireEvent.mouseMove(document.body, { type: 'mousemove' })
   })
@@ -203,7 +203,7 @@ test('should set accuracy of the pointer', () => {
       pointerType: 'touch',
       type: 'pointerdown',
     }
-    handleInteractionPointer(PointerEvent)
+    setMaxPointerSize(PointerEvent)
     fireEvent.touchStart(getByTestId('test-div'), { type: 'touchstart' })
     fireEvent.mouseMove(document.body, { type: 'mousemove' })
   })
@@ -222,7 +222,7 @@ test('should set accuracy of the pointer', () => {
       pointerType: 'touch',
       type: 'pointerdown',
     }
-    handleInteractionPointer(PointerEvent)
+    setMaxPointerSize(PointerEvent)
     fireEvent.touchStart(getByTestId('test-div'), { type: 'touchstart' })
   })
 
@@ -248,7 +248,7 @@ test('should set accuracy of the pointer', () => {
       pointerType: 'mouse',
       type: 'pointerdown',
     }
-    handleInteractionPointer(PointerEvent)
+    setMaxPointerSize(PointerEvent)
     fireEvent.mouseDown(getByTestId('test-div'), { type: 'mousedown' })
   })
 

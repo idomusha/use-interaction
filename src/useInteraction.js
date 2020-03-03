@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { round } from 'lodash'
 import ulog from 'ulog'
-const log = ulog('use-interaction')
 
+const log = ulog('use-interaction')
+let setMaxPointerSize = null
 const getKey = event => (event.keyCode ? event.keyCode : event.which)
-let handleInteractionPointer = null
 
 const useInteraction = ({ initial = null } = {}) => {
   const initialPointerType =
@@ -115,18 +115,19 @@ const useInteraction = ({ initial = null } = {}) => {
     [keys, inputs, handleInteractionChange]
   )
 
-  handleInteractionPointer = useCallback(
-    event => {
-      log.info(event, event.type)
+  setMaxPointerSize = event => {
+    log.info(event, event.type, event.pointerType)
 
-      const nextAccuracy = round(event.height, 1)
+    const nextAccuracy = round(event.height, 1)
 
-      if (nextAccuracy > pointerAccuracy) {
-        setPointerAccuracy(nextAccuracy)
-      }
-    },
-    [pointerAccuracy]
-  )
+    if (nextAccuracy > pointerAccuracy) {
+      setPointerAccuracy(nextAccuracy)
+    }
+  }
+
+  const handleInteractionPointer = useCallback(setMaxPointerSize, [
+    pointerAccuracy,
+  ])
 
   useEffect(() => {
     window.addEventListener('touchstart', handleInteractionTouch, false)
@@ -138,7 +139,11 @@ const useInteraction = ({ initial = null } = {}) => {
       window.removeEventListener('keydown', handleInteractionKeyboard, false)
       window.removeEventListener('pointerdown', handleInteractionPointer, false)
     }
-  }, [handleInteractionTouch, handleInteractionKeyboard])
+  }, [
+    handleInteractionTouch,
+    handleInteractionKeyboard,
+    handleInteractionPointer,
+  ])
 
   useEffect(() => {
     if (firedEvent.mousemove === true || firedEvent.wheel === true) {
@@ -173,4 +178,4 @@ useInteraction.propTypes = {
 }
 
 export default useInteraction
-export { handleInteractionPointer, log }
+export { setMaxPointerSize, log }

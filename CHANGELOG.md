@@ -9,6 +9,12 @@
 ### Removed
  -->
 
+## [2.0.0-beta.3] - 2020-03-03
+
+### Fixed
+
+- Max pointer size
+
 ## [2.0.0-beta.2] - 2020-02-26
 
 ### Fixed
