@@ -62,7 +62,7 @@
     "gh-pages": "^2.2.0",
     "husky": "^4.2.3",
     "lodash": "^4.17.15",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "prettier": "^1.19.1",
     "prop-types": "^15.7.2",
     "react": "^16.13.0",
